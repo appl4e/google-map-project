@@ -1,0 +1,17 @@
+body{
+	padding: 0;
+	margin: 0;
+}
+.container{
+	width: 90%;
+	margin: auto;
+}
+h1{
+	text-align: center;
+	font-family: sans-serif;
+}
+#map{
+	width: 80%;
+	margin: auto;
+	height: 500px;
+}
