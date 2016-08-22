@@ -18,7 +18,8 @@ function initMap(){
                     var mapDiv = document.getElementById('map');
                     var directionsService = new google.maps.DirectionsService;
                     var directionsDisplay = new google.maps.DirectionsRenderer({polylineOptions: {strokeColor: "#8DC53E"}, suppressMarkers: true,preserveViewport: true});
-                    var distanceService = new google.maps.DistanceMatrixService();
+                    
+
                     var map = new google.maps.Map(mapDiv, {
                         center: {lat: 32.780359, lng:  -96.799632},
                         zoom: 17,
@@ -355,54 +356,61 @@ function initMap(){
                             text: "<b class='text-capitalize'>The Adolphus Tower</b><p></p>"
                         }
                         ];
-                        var infowindow = new google.maps.InfoWindow();  
-                        for(var i=0, feature; feature= features[i]; i++){
-                            var type = feature.type;
-                            var address = feature.text;
-                            var marker = addMarker(feature, type, address);
-                        }                                          
+                    var infowindow = new google.maps.InfoWindow();  
+                    var infowindow2 = new google.maps.InfoWindow();
+                    for(var i=0, feature; feature= features[i]; i++){
+                        var type = feature.type;
+                        var address = feature.text;
+                        var marker = addMarker(feature, type, address);
+                    }                                          
                     function addMarker(feature, type, html) {
-                       
-                      var markercontent = html;
-                      var marker = new google.maps.Marker({
+                        var markercontent = html;
+                        var marker = new google.maps.Marker({
                         position: feature.position,
                         icon: icons[feature.type].icon,
                         map: map,
                         type: feature.type                        
                       });
-                      google.maps.event.addListener(marker, 'click', function(){
-                        infowindow.setContent(markercontent);
-                        infowindow.open(map,marker);
-                        calculateAndDisplayRoute(directionsService, directionsDisplay);
-                      });
-                      function calculateAndDisplayRoute(directionService, directionsDisplay){
+                        var distance;
+                        var duration;
+                      
+                      function calculateAndDisplayRoute(directionService, directionsDisplay, distance, duration){
                         var start = new google.maps.LatLng(32.780359, -96.799632);
                         var end = feature.position;
-                       waypts =[];
-
+                        waypts =[];
                         directionService.route({
                             origin: start,
                             destination: end,
                             waypoints: waypts,
                             optimizeWaypoints: true,
-                            travelMode: 'WALKING'
+                            travelMode: 'WALKING',
+                            unitSystem: google.maps.DirectionsUnitSystem.METRIC
                             }, function(response, status){
                                 if(status == 'OK'){
                                     directionsDisplay.setDirections(response);
-                                    var point = response.routes[ 0 ].legs[ 0 ];
-                                    $( '#travel_data' ).html( 'Estimated travel time: ' + point.duration.text + ' (' + point.distance.text + ')' );
+                                    
+                                    var step= 1;
+                                    infowindow2.setContent(response.routes[0].legs[0].distance.text +"<br>"+ response.routes[0].legs[0].duration.text) ;
+                                    
+                                    infowindow2.setPosition(response.routes[0].legs[0].steps[step].start_location);
+                                    infowindow2.open(map);                                    
                                 }
                                 else{
                                     window.alert('Directions request failed due to ' + status);
                                 }
                             }
-                            )
+                            );
                       }
-
+                      // console.log(distance);
+                      // console.log(duration);
+                      google.maps.event.addListener(marker, 'click', function(){                        
+                        calculateAndDisplayRoute(directionsService, directionsDisplay);
+                        infowindow.setContent(markercontent);
+                        infowindow.open(map,marker);
+                      });
                       if (!markerGroups[type]) markerGroups[type] = [];
                         markerGroups[type].push(marker);
                         return marker;
-
                     
                     }
 
